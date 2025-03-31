@@ -1,13 +1,13 @@
-import { collection, getDocs } from "firebase/firestore"; // Import collection
-import db from './server/config/db.js';
+import express from 'express';
 
-const users = collection(db, "users");
+const app = express();
+const PORT = 3000;
 
-getDocs(users)
-  .then(snapshot => {
-    console.log("Firebase connected successfully! Retrieved users:");
-    snapshot.forEach(doc => console.log(doc.id, "=>", doc.data()));
-  })
-  .catch(error => {
-    console.error("Error connecting to Firebase: ", error);
-  });
+app.use(express.json());
+
+//Mount the endpoints
+app.use("/api", router);
+
+app.listen(PORT, () => 
+    console.log(`Server is running on port ${PORT}`)
+)
