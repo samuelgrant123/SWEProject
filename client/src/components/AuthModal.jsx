@@ -17,15 +17,15 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
     setError('');
     setLoading(true);
 
-    try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-      }
+    try{
+      const repsonse = await fetch("", {
+
+      });
+      const data = await response.json();
+  
       setLoading(false);
       onAuthSuccess(); // Close modal and refresh app state
-    } catch (err) {
+    }catch (err){
       setError(err.message);
       setLoading(false);
     }

@@ -5,6 +5,9 @@ import { getWeatherAPIData } from '../handlers/weatherHandlers.js';
 
 const router = express.Router();
 
+//Authentication functions
+router.get('/auth/login', getUserData);
+
 //The user functions
 router.get('/user/get/:firstname/:lastname', getUserData);
 router.post('/user/post', postUserData);

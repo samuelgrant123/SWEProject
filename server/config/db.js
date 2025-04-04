@@ -3,18 +3,25 @@ import { getFirestore } from "firebase/firestore";
 import 'dotenv/config';
 
 const apiKey = process.env.API_KEY;
+const authDomain = process.env.AUTH_DOMAIN;
+const projectId = process.env.PROJECT_ID;
+const storageBucket = process.env.STORAGE_BUCKET;
+const messagingSenderId = process.env.SENDER_ID;
+const appId = process.env.APP_ID;
+const measurementId = process.env.MEASUREMENT_ID;
+
 
 const firebaseConfig = {
     apiKey: apiKey,
-    authDomain: "introsweproject.firebaseapp.com",
-    projectId: "introsweproject",
-    storageBucket: "introsweproject.firebasestorage.app",
-    messagingSenderId: "484900005716",
-    appId: "1:484900005716:web:6697636dcdb87cdea18ac1",
-    measurementId: "G-LEKB4LE4L5"
+    authDomain: authDomain,
+    projectId: projectId,
+    storageBucket: storageBucket,
+    messagingSenderId: messagingSenderId,
+    appId: appId,
+    measurementId: measurementId
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export default db;
+export default {db, app};
