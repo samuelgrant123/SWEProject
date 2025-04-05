@@ -1,5 +1,4 @@
-import firebase from 'firebase/compat/app';
-import db from './server/config/db.js';
+import { db } from '../config/db.js'
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 
 //Method to get user data based on id

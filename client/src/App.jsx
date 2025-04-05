@@ -5,8 +5,7 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import ResourcesPage from './components/ResourcesPage';
 import UserProfile from './components/UserProfile';
-import { auth } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+//import { onAuthStateChanged } from 'firebase/auth';
 
 
 function App() {

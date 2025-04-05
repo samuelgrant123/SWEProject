@@ -1,10 +1,4 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
 import './LandingPage.css';
 
 export default function LandingPage({ onNavigate }) {
@@ -22,24 +16,20 @@ export default function LandingPage({ onNavigate }) {
     setError('');
     setLoading(true);
 
-    try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        localStorage.setItem('userType', 'authenticated');
-      } else {
-        if (password !== confirm) {
-          setError('Passwords do not match');
-          setLoading(false);
-          return;
-        }
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCred.user, { displayName: username });
-        localStorage.setItem('userType', 'authenticated');
-      }
+    const endpoint = isLogin ? 'login' : 'signup';
 
+    try{
+      const response = await fetch(`http://localhost:5000/api/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+  
       setLoading(false);
       onNavigate('dashboard');
-    } catch (err) {
+    }catch (err){
       setError(err.message);
       setLoading(false);
     }

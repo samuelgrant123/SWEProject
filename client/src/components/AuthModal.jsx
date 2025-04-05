@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
 
 export default function AuthModal({ onClose, onAuthSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,11 +12,16 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
     setError('');
     setLoading(true);
 
-    try{
-      const repsonse = await fetch("", {
+    const endpoint = isLogin ? 'login' : 'signup';
 
+    try{
+      const response = await fetch(`http://localhost:3000/api/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify({email, password})
       });
       const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
   
       setLoading(false);
       onAuthSuccess(); // Close modal and refresh app state

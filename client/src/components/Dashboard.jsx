@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
 import InteractiveMap from './InteractiveMap';
 import Checklist from './Checklist';
 import ChatRoom from './ChatBoard';
