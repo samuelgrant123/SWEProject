@@ -19,14 +19,21 @@ export default function LandingPage({ onNavigate }) {
     const endpoint = isLogin ? 'login' : 'signup';
 
     try{
-      const response = await fetch(`http://localhost:5000/api/auth/${endpoint}`, {
+      const response = await fetch(`http://localhost:4000/api/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({email, password})
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-  
+      
+      const userData = await fetch('http://localhost:4000/api/auth/user');
+      const auth = await userData.json();
+      if(auth.auth && auth.auth.user){
+        localStorage.setItem('current_user', auth.auth.user); 
+        localStorage.setItem('current_user_type', 'user');
+        localStorage.setItem('current_user_location', 'Gainesville, Florida');   
+      }
       setLoading(false);
       onNavigate('dashboard');
     }catch (err){
@@ -53,8 +60,8 @@ export default function LandingPage({ onNavigate }) {
             <button
               className="secondary"
               onClick={() => {
-                localStorage.setItem('userType', 'guest');
-                localStorage.setItem('userLocation', 'Gainesville, Florida');
+                localStorage.setItem('current_user_type', 'guest');
+                localStorage.setItem('current_user_location', 'Gainesville, Florida');
                 onNavigate('dashboard');
               }}
             >

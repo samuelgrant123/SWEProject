@@ -14,11 +14,10 @@ export default function Dashboard({ onNavigate }) {
   const [showProfile, setShowProfile] = useState(false);
   const [showGuestPrompt, setShowGuestPrompt] = useState(false);
 
-  const userType = localStorage.getItem('userType');
-  const user = auth.currentUser;
-  const displayName = userType === 'guest' ? 'guest' : user?.displayName || 'user';
+  const userType = localStorage.getItem('current_user_type'); // Get current user type from localStorage
+  const currentUser = JSON.parse(localStorage.getItem('current_user')); // Get the current user from localStorage and parse it
 
-  // Initial load
+  // Initial load for location
   useEffect(() => {
     const loc = localStorage.getItem('userLocation');
     if (loc) {
@@ -27,10 +26,10 @@ export default function Dashboard({ onNavigate }) {
     }
   }, []);
 
-  // Sync with localStorage updates
+  // Sync with localStorage updates for location
   useEffect(() => {
     const updateLocation = () => {
-      const newLoc = localStorage.getItem('userLocation');
+      const newLoc = localStorage.getItem('current_user_location');
       if (newLoc && newLoc !== locationName) {
         setLocationName(newLoc);
         fetchWeather(newLoc);
@@ -124,7 +123,32 @@ export default function Dashboard({ onNavigate }) {
             }
           }}
         >
-          {displayName}
+          {'Profile'}
+        </div>
+        <div>
+        {userType !== 'guest' && (
+            <button
+              className="sign-out-button"
+              onClick={async () => {
+                try{
+                  await fetch("http://localhost:4000/api/auth/signout", {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  });
+                  localStorage.removeItem('current_user');
+                  localStorage.removeItem('current_user_type');
+                  localStorage.removeItem('current_user_location');
+                  onNavigate('landing'); // Navigate to the landing page
+                }catch(error){
+                  console.error("Error on the frontend side of signing out");
+                }
+              }}
+            >
+              Sign Out
+            </button>
+        )}
         </div>
       </div>
 
@@ -148,7 +172,7 @@ export default function Dashboard({ onNavigate }) {
 
       {/* Profile Modal */}
       {showProfile && (
-        <ProfileModal user={user} onClose={() => setShowProfile(false)} />
+        <ProfileModal user={currentUser} onClose={() => setShowProfile(false)} />
       )}
 
       {/* Guest Prompt Modal */}
@@ -156,7 +180,9 @@ export default function Dashboard({ onNavigate }) {
         <GuestPromptModal
           onClose={() => setShowGuestPrompt(false)}
           onLoginClick={() => {
-            localStorage.removeItem('userType'); // Optional cleanup
+            localStorage.removeItem('current_user');
+            localStorage.removeItem('current_user_type');
+            localStorage.removeItem('current_user_location');
             onNavigate('landing'); // Go back to landing page
           }}
         />

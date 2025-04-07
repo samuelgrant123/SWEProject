@@ -1,5 +1,5 @@
 import { app } from '../config/db.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword  } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut  } from "firebase/auth";
 
 const auth = getAuth(app);
 
@@ -26,3 +26,23 @@ export const login = async (req, res) => {
         return res.status(400).json({message: error.message})
     }
 }
+
+export const getUser = async (req, res) => {
+  try {
+    res.status(200).json({ auth });
+  } catch (error) {
+    console.error("Getting Auth not successful", error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const signOutUser = async (req, res) => {
+  signOut(auth).then(() => {
+    res.status(200).json({ auth });
+    console.log("Sign out successful");
+  }).catch((error) => {
+    console.error("Signout not successful", error);
+    res.status(400).json({ message: error.message });
+  });
+};
+

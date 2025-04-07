@@ -1,13 +1,15 @@
 import express from 'express';
 import { getUserData, postUserData, deleteUserData, updateUserData } from '../handlers/userHandlers.js';
 import { getArticleData } from '../handlers/dataHandlers.js';
-import { signup, login } from '../handlers/userAuthHandlers.js';
+import { signup, login, getUser, signOutUser } from '../handlers/userAuthHandlers.js';
 
 const router = express.Router();
 
 //Authentication functions
 router.post('/auth/login', login);
 router.post('/auth/signup', signup);
+router.get('/auth/user', getUser);
+router.delete('/auth/signout', signOutUser);
 
 //The user functions
 router.get('/user/get/:firstname/:lastname', getUserData);
