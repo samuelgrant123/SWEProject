@@ -1,6 +1,5 @@
 import express from 'express';
-import { getUserData, postUserData, deleteUserData, updateUserData } from '../handlers/userHandlers.js';
-import { getArticleData } from '../handlers/dataHandlers.js';
+import { getAllUserData, postUserData, deleteUserData, updateUserLocation, getUserLocation } from '../handlers/userHandlers.js';
 import { signup, login, getUser, signOutUser } from '../handlers/userAuthHandlers.js';
 
 const router = express.Router();
@@ -12,12 +11,12 @@ router.get('/auth/user', getUser);
 router.delete('/auth/signout', signOutUser);
 
 //The user functions
-router.get('/user/get/:firstname/:lastname', getUserData);
 router.post('/user/post', postUserData);
-router.patch('/user/update/:firstname/:lastname/:password', updateUserData);
-router.delete('/user/delete/:firstname/:lastname', deleteUserData);
+router.get('/user/getLocation/:email', getUserLocation);
+router.patch('/user/updateLocation/:email/:newLocation', updateUserLocation);
+router.get('/user/getAllData/:email', getAllUserData);
 
-//Data functions
-router.get('/info/get', getArticleData);
+//Extra user functions - not currently being used
+router.delete('/user/delete/:firstname/:lastname', deleteUserData);
 
 export default router;

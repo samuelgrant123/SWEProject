@@ -4,7 +4,7 @@ import ChatBoard from './components/ChatBoard';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import ResourcesPage from './components/ResourcesPage';
-import UserProfile from './components/UserProfile';
+//import UserProfile from './components/UserProfile';
 //import { onAuthStateChanged } from 'firebase/auth';
 
 
@@ -23,8 +23,8 @@ function App() {
         return <ChatBoard onNavigate={setScreen} />;
       case 'resources':
         return <ResourcesPage onNavigate={setScreen} />;
-      case 'profile':
-        return <UserProfile onNavigate={setScreen} />;
+      //case 'profile':
+        //return <UserProfile onNavigate={setScreen} />;
       default:
         return <LandingPage onNavigate={setScreen} />;
     }

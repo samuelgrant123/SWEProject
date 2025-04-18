@@ -3,7 +3,6 @@ import InteractiveMap from './InteractiveMap';
 import Checklist from './Checklist';
 import ChatRoom from './ChatBoard';
 import Resources from './ResourcesPage';
-import ProfileModal from './ProfileModal';
 import GuestPromptModal from './GuestPromptModal';
 import './Dashboard.css';
 
@@ -15,36 +14,61 @@ export default function Dashboard({ onNavigate }) {
   const [showGuestPrompt, setShowGuestPrompt] = useState(false);
 
   const userType = localStorage.getItem('current_user_type'); // Get current user type from localStorage
-  const currentUser = JSON.parse(localStorage.getItem('current_user')); // Get the current user from localStorage and parse it
 
-  // Initial load for location
+  //Initial load for location
   useEffect(() => {
-    const loc = localStorage.getItem('userLocation');
-    if (loc) {
-      setLocationName(loc);
-      fetchWeather(loc);
-    }
-  }, []);
-
-  // Sync with localStorage updates for location
-  useEffect(() => {
-    const updateLocation = () => {
-      const newLoc = localStorage.getItem('current_user_location');
-      if (newLoc && newLoc !== locationName) {
-        setLocationName(newLoc);
-        fetchWeather(newLoc);
+    const fetchLocation = async () => {
+      try{
+        const userEmail = localStorage.getItem('current_user_email');
+        const response = await fetch(`http://localhost:4000/api/user/getLocation/${userEmail}`);
+        if (!response.ok){
+          throw new Error('Error in API fetching the location of user');
+        }
+        const data = await response.json();
+        const loc = data.location;
+        if (loc){
+          setLocationName(loc);
+          fetchWeather(loc);
+        }
+      }catch (error) {
+        console.error('Error fetching location in Dashboard.jsx:', error);
       }
     };
+    fetchLocation();
+  }, []);
+  
 
+  //Sync with localStorage updates for location
+  useEffect(() => {
+    const updateLocation = async () => {
+      try {
+        const userEmail = localStorage.getItem('current_user_email');
+        const response = await fetch(`http://localhost:4000/api/user/getLocation/${userEmail}`);
+        if (!response.ok) {
+          throw new Error('Error in API fetching the location of user');
+        }
+        const data = await response.json();
+        const newLoc = data.location;
+        if (newLoc && newLoc !== locationName){
+          setLocationName(newLoc);
+          fetchWeather(newLoc);
+        }
+      } catch (error) {
+        console.error('Location update failure in Dashboard.jsx', error);
+      }
+    };
+  
     window.addEventListener('storage', updateLocation);
     const interval = setInterval(updateLocation, 1000);
-
+  
     return () => {
       window.removeEventListener('storage', updateLocation);
       clearInterval(interval);
     };
   }, [locationName]);
+  
 
+  //Calling the weather API
   const fetchWeather = async (location) => {
     try {
       const res = await fetch(
@@ -137,9 +161,8 @@ export default function Dashboard({ onNavigate }) {
                       "Content-Type": "application/json",
                     },
                   });
-                  localStorage.removeItem('current_user');
-                  localStorage.removeItem('current_user_type');
                   localStorage.removeItem('current_user_location');
+                  localStorage.removeItem('current_user_email');
                   onNavigate('landing'); // Navigate to the landing page
                 }catch(error){
                   console.error("Error on the frontend side of signing out");
@@ -170,19 +193,14 @@ export default function Dashboard({ onNavigate }) {
         {renderTab()}
       </div>
 
-      {/* Profile Modal */}
-      {showProfile && (
-        <ProfileModal user={currentUser} onClose={() => setShowProfile(false)} />
-      )}
 
       {/* Guest Prompt Modal */}
       {showGuestPrompt && (
         <GuestPromptModal
           onClose={() => setShowGuestPrompt(false)}
           onLoginClick={() => {
-            localStorage.removeItem('current_user');
             localStorage.removeItem('current_user_type');
-            localStorage.removeItem('current_user_location');
+            localStorage.removeItem('current_user_email');
             onNavigate('landing'); // Go back to landing page
           }}
         />

@@ -5,8 +5,9 @@ export default function LandingPage({ onNavigate }) {
   const [showForm, setShowForm] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,14 +27,19 @@ export default function LandingPage({ onNavigate }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-      
-      const userData = await fetch('http://localhost:4000/api/auth/user');
-      const auth = await userData.json();
-      if(auth.auth && auth.auth.user){
-        localStorage.setItem('current_user', auth.auth.user); 
-        localStorage.setItem('current_user_type', 'user');
-        localStorage.setItem('current_user_location', 'Gainesville, Florida');   
+
+      if (endpoint === 'signup'){
+        const signupResponse = await fetch(`http://localhost:4000/api/user/post`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json'},
+          body: JSON.stringify({firstName, lastName, email, password})
+        });
+
+        const userPostData = await signupResponse.json();
+        if (!signupResponse.ok) throw new Error(userPostData.message);
       }
+      localStorage.setItem('current_user_type', 'user');
+      localStorage.setItem('current_user_email', email);
       setLoading(false);
       onNavigate('dashboard');
     }catch (err){
@@ -61,7 +67,6 @@ export default function LandingPage({ onNavigate }) {
               className="secondary"
               onClick={() => {
                 localStorage.setItem('current_user_type', 'guest');
-                localStorage.setItem('current_user_location', 'Gainesville, Florida');
                 onNavigate('dashboard');
               }}
             >
@@ -86,10 +91,21 @@ export default function LandingPage({ onNavigate }) {
               {!isLogin && (
                 <input
                   type="text"
-                  placeholder="Username"
+                  placeholder = "First Name"
                   className="w-full mb-4 px-4 py-2 border rounded"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              )}
+
+              {!isLogin && (
+                <input
+                  type="text"
+                  placeholder = "Last Name"
+                  className="w-full mb-4 px-4 py-2 border rounded"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   required
                 />
               )}
