@@ -1,3 +1,5 @@
+# Note from SAM - all of the frontend logic is written by AIDAN. He gave me the code, I just committed everything. The only thing I did in the frontend was integrate it with the backend
+
 # To run the project
 
 run `cd server`
@@ -10,9 +12,12 @@ run `cd client`
 run `npm install`
 run `npm run dev`
 
+# For testing
+Be in the root folder and run `npm run test`
+Make sure database is open and email@example.com is deleted in the database
 
 
-## FOR AIDAN
+# FOR AIDAN
 -----------------------------------------------------
 # To get the location of the current user (has to be in an async function and inside a try-catch)
 const userEmail = localStorage.getItem('current_user_email');
