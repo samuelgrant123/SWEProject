@@ -1,0 +1,154 @@
+/* Overall layout */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styling */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1e293b;
+  color: white;
+  padding: 12px 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo and title */
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-logo {
+  height: 40px;
+  width: auto;
+}
+
+.weather-text {
+  font-size: 14px;
+  margin-top: 4px;
+  color: #cbd5e1;
+}
+
+/* User profile and sign out */
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  padding-right: 20px;
+}
+
+.user-badge {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333;
+}
+
+.user-badge:hover {
+  background-color: #e0e0e0;
+}
+
+.sign-out-button {
+  padding: 6px 12px;
+  border: 1px solid #d9534f;
+  background-color: #d9534f;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.sign-out-button:hover {
+  background-color: #c9302c;
+}
+
+/* Tab navigation */
+.dashboard-tabs {
+  display: flex;
+  justify-content: center;
+  background-color: #f3f4f6;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #374151;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: #1d4ed8;
+}
+
+.tab-button.active {
+  border-bottom: 2px solid #1d4ed8;
+  font-weight: bold;
+  color: #1d4ed8;
+}
+
+/* Tab content */
+.dashboard-body {
+  flex-grow: 1;
+  padding: 24px;
+  background-color: #f9fafb;
+  overflow-y: auto;
+}
+
+.tab-content {
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Alerts */
+.alert-tab {
+  background-color: #fee2e2;
+  border-left: 4px solid #dc2626;
+  padding: 12px;
+  font-weight: bold;
+  color: #991b1b;
+}
+
+/* Location text */
+.location-text {
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.alerts-tab {
+  padding: 16px;
+}
+
+.alert-card {
+  background: #fff3f3;
+  border: 1px solid #e63946;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.alert-card h3 {
+  color: #b00020;
+  margin: 0 0 8px 0;
+}
