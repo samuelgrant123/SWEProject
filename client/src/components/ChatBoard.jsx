@@ -1,17 +1,32 @@
 // client/src/components/ChatBoard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { getDatabase, ref, onChildAdded, push } from 'firebase/database';
-import { auth } from '../Firebase';
 import './ChatBoard.css';
+import { getAuth } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDCxdecZb3qufue6W179YBcvJDsxtDTi9k",
+  authDomain: "disasterdash-a77b2.firebaseapp.com",
+  projectId: "disasterdash-a77b2",
+  storageBucket: "disasterdash-a77b2.appspot.com",
+  messagingSenderId: "329859835226",
+  appId: "1:329859835226:web:b297bc78714128a6a97f63",
+  measurementId: "G-NNP2R9MN4D",
+  databaseURL: "https://disasterdash-a77b2-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 export default function ChatBoard() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const db = getDatabase();
   const userLocation = localStorage.getItem('userLocation') || 'Unknown';
   const locationKey = userLocation.replace(/\s+/g, '_');
-  const username = auth.currentUser?.displayName || 'Guest';
-  const messagesRef = useRef(null);
+  const username = localStorage.getItem('userDisplayName') || 'User';
+  const messagesRef = useRef([]);
 
   useEffect(() => {
     const chatRef = ref(db, `chats/${locationKey}`);
@@ -19,15 +34,13 @@ export default function ChatBoard() {
 
     const unsubscribe = onChildAdded(chatRef, (snapshot) => {
       const msg = snapshot.val();
-      // Avoid adding duplicates
       if (!messagesRef.current.some(m => m.timestamp === msg.timestamp && m.text === msg.text)) {
-        messagesRef.current.unshift(msg); // newest first
+        messagesRef.current.unshift(msg); // Newest at top
         setMessages([...messagesRef.current]);
       }
     });
 
     return () => {
-      // Firebase doesn't expose an offChildAdded so we reset manually
       messagesRef.current = [];
     };
   }, [locationKey]);

@@ -1,23 +1,31 @@
+// server/routes/routes.js
 import express from 'express';
-import { getUserData, postUserData, deleteUserData, updateUserData } from '../handlers/userHandlers.js';
-import { getArticleData } from '../handlers/dataHandlers.js';
-import { signup, login, getUser, signOutUser } from '../handlers/userAuthHandlers.js';
+import {
+  login, signup, getUser, signOutUser, updateUserName
+} from '../handlers/userAuthHandlers.js';
+import {
+  postUserData, getUserLocation, updateUserLocation, getAllUserData, deleteUserData
+} from '../handlers/userHandlers.js';
+import { sendMessage, getMessages } from '../handlers/chatHandlers.js';
 
-const router = express.Router();
+const router = express.Router(); // ✅ this must come first!
 
-//Authentication functions
+// Auth routes
 router.post('/auth/login', login);
 router.post('/auth/signup', signup);
 router.get('/auth/user', getUser);
 router.delete('/auth/signout', signOutUser);
 
-//The user functions
-router.get('/user/get/:firstname/:lastname', getUserData);
+// User routes
 router.post('/user/post', postUserData);
-router.patch('/user/update/:firstname/:lastname/:password', updateUserData);
+router.get('/user/getLocation/:email', getUserLocation);
+router.patch('/user/updateLocation/:email/:newLocation', updateUserLocation);
+router.patch('/user/updateName/:email/:newName', updateUserName);
+router.get('/user/getAllData/:email', getAllUserData);
 router.delete('/user/delete/:firstname/:lastname', deleteUserData);
 
-//Data functions
-router.get('/info/get', getArticleData);
+// Chat routes
+router.post('/chat/send', sendMessage);
+router.get('/chat/:location', getMessages);
 
 export default router;

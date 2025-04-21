@@ -1,26 +1,34 @@
 // client/src/components/ProfileModal.jsx
 import React, { useState } from 'react';
 import './ProfileModal.css';
-import { updateProfile } from 'firebase/auth';
 
 export default function ProfileModal({ user, onClose }) {
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [displayName, setDisplayName] = useState(localStorage.getItem('userDisplayName') || user?.displayName || '');
   const [location, setLocation] = useState(localStorage.getItem('userLocation') || '');
   const [status, setStatus] = useState('');
 
   const handleSave = async () => {
     try {
-      // Update Firebase displayName
-      if (user && displayName !== user.displayName) {
-        await updateProfile(user, { displayName });
+      if (user?.email && displayName !== user.displayName) {
+        await fetch(`http://localhost:4000/api/user/updateName/${user.email}/${displayName}`, {
+          method: 'PATCH',
+        });
+
+        localStorage.setItem('userDisplayName', displayName);
         setStatus('Username updated.');
       }
 
-      // Update localStorage location
-      localStorage.setItem('userLocation', location);
-      setStatus((prev) => prev + ' Location saved.');
+      if (location) {
+        // ✅ Backend: Update location
+        await fetch(`http://localhost:4000/api/user/updateLocation/${user.email}/${location}`, {
+          method: 'PATCH',
+        });
 
-      // Optional: trigger a refresh if needed
+        localStorage.setItem('userLocation', location);
+        setStatus((prev) => `${prev} Location saved.`);
+      }
+
+      // ✅ Refresh UI (App.jsx or Dashboard will pick up the event)
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('Error updating profile:', err);

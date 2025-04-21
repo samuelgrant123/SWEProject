@@ -1,13 +1,6 @@
-// client/src/components/LandingPage.jsx
 import React, { useState } from 'react';
 import './LandingPage.css';
-import { auth } from '../Firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signOut
-} from 'firebase/auth';
+import logo from '../assets/logo.png';
 
 export default function LandingPage({ onNavigate }) {
   const [showForm, setShowForm] = useState(false);
@@ -25,30 +18,97 @@ export default function LandingPage({ onNavigate }) {
     setLoading(true);
 
     try {
+      if (!email || !password) throw new Error("Email and password are required");
+
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        // Login through backend
+        const response = await fetch("http://localhost:4000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+
+        localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('userType', 'authenticated');
+        localStorage.setItem('userDisplayName', data.displayName || 'User');
+
       } else {
-        if (password !== confirm) {
-          setError("Passwords do not match");
-          setLoading(false);
-          return;
-        }
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCred.user, { displayName: username });
+        if (password !== confirm) throw new Error("Passwords do not match");
+
+        // Signup
+        const signupRes = await fetch("http://localhost:4000/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, displayName: username }),
+        });
+
+        const data = await signupRes.json();
+        if (!signupRes.ok) throw new Error(data.message);
+
+        // Also save to Firestore database
+        await fetch("http://localhost:4000/api/user/post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            firstName: username,
+            lastName: "Default",
+          }),
+        });
+
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userType', 'authenticated');
+        localStorage.setItem('userDisplayName', username);
       }
 
-      setLoading(false);
+      localStorage.setItem('userLocation', 'Gainesville, Florida');
+      localStorage.setItem('currentScreen', 'dashboard');
+
+      window.dispatchEvent(new Event('user-login'));
       onNavigate('dashboard');
+
     } catch (err) {
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
+  const handleGuestAccess = async () => {
+    try {
+      // Sign out from backend Firebase session
+      await fetch("http://localhost:4000/api/auth/signout", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (err) {
+      console.warn("Backend signout failed (probably already signed out)");
+    }
+  
+    
+    localStorage.clear();
+  
+    
+    localStorage.setItem('userType', 'guest');
+    localStorage.setItem('userLocation', 'Gainesville, Florida');
+    localStorage.setItem('currentScreen', 'dashboard');
+  
+    
+    window.dispatchEvent(new Event('user-login'));
+  
+    // Navigate
+    onNavigate('dashboard');
+  };
+  
+
   return (
     <div className="landing-container">
       <div className="navbar">
-        <img src="/logo.png" alt="DisasterDash Logo" className="logo" />
+        <img src={logo} alt="DisasterDash Logo" className="logo" />
       </div>
 
       <div className="hero animated">
@@ -61,15 +121,7 @@ export default function LandingPage({ onNavigate }) {
               Get Started
             </button>
 
-            <button
-              className="secondary"
-              onClick={async () => {
-                await signOut(auth);
-                localStorage.setItem('userType', 'guest');
-                localStorage.setItem('userLocation', 'Gainesville, Florida');
-                onNavigate('dashboard');
-              }}
-            >
+            <button className="secondary" onClick={handleGuestAccess}>
               Explore as Guest
             </button>
           </div>

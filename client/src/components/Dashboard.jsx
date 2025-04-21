@@ -1,4 +1,3 @@
-// client/src/components/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import InteractiveMap from './InteractiveMap';
 import Checklist from './Checklist';
@@ -6,6 +5,7 @@ import ChatRoom from './ChatBoard';
 import Resources from './ResourcesPage';
 import ProfileModal from './ProfileModal';
 import GuestPromptModal from './GuestPromptModal';
+import logo from '../assets/logo.png';
 import AlertsTab from './AlertsTab';
 import './Dashboard.css';
 
@@ -73,6 +73,20 @@ export default function Dashboard({ onNavigate, user, userType }) {
     return map[code] || 'Unknown';
   };
 
+  const handleSignOut = async () => {
+    try {
+      await fetch("http://localhost:4000/api/auth/signout", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Error signing out", error);
+    }
+
+    localStorage.clear();
+    onNavigate('landing');
+  };
+
   const renderTab = () => {
     switch (tab) {
       case 'map':
@@ -99,7 +113,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div className="logo-title">
-          <img src="/logo.png" alt="Logo" className="dashboard-logo" />
+          <img src={logo} alt="DisasterDash Logo" className="logo" />
           <div>
             <h1>DisasterDash by ApocaTech</h1>
             <p className="weather-text">{weather}</p>
@@ -107,51 +121,32 @@ export default function Dashboard({ onNavigate, user, userType }) {
         </div>
 
         <div className="user-controls">
-  <div
-    className="user-badge"
-    onClick={() => {
-      if (userType === 'guest') {
-        setShowGuestPrompt(true);
-      } else {
-        setShowProfile(true);
-      }
-    }}
-  >
-    {userType === 'guest' ? 'Guest' : user?.displayName || 'User'}
-  </div>
+          <div
+            className="user-badge"
+            onClick={() => {
+              if (userType === 'guest') {
+                setShowGuestPrompt(true);
+              } else {
+                setShowProfile(true);
+              }
+            }}
+          >
+            {userType === 'guest' ? 'Guest' : user?.displayName || 'User'}
+          </div>
 
-  {userType === 'guest' ? (
-    <button
-      className="sign-out-button"
-      onClick={() => {
-        localStorage.clear();
-        onNavigate('landing');
-        localStorage.setItem('currentScreen', 'landing');
-      }}
-    >
-      Sign In
-    </button>
-  ) : (
-    <button
-      className="sign-out-button"
-      onClick={async () => {
-        try {
-          await fetch("http://localhost:4000/api/auth/signout", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-          });
-
-          localStorage.clear();
-          onNavigate('landing');
-        } catch (error) {
-          console.error("Error signing out");
-        }
-      }}
-    >
-      Sign Out
-    </button>
-  )}
-</div>
+          {userType === 'authenticated' ? (
+            <button className="sign-out-button" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          ) : (
+            <button
+              className="sign-out-button"
+              onClick={() => onNavigate('landing')}
+            >
+              Sign In
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="dashboard-tabs">
@@ -166,12 +161,13 @@ export default function Dashboard({ onNavigate, user, userType }) {
         ))}
       </div>
 
-      <div className="dashboard-body">
-        {renderTab()}
-      </div>
+      <div className="dashboard-body">{renderTab()}</div>
 
       {showProfile && (
-        <ProfileModal user={user} onClose={() => setShowProfile(false)} />
+        <ProfileModal
+          user={user}
+          onClose={() => setShowProfile(false)}
+        />
       )}
 
       {showGuestPrompt && (
