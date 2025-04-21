@@ -88,14 +88,7 @@ function SearchBar({ setUserCoords, setUserLocation }) {
         const { lat, lon, address } = res.data[0];
         const simplified = simplifyAddress(address);
         if (simplified) {
-          //localStorage.setItem('userLocation', simplified);
-          const email = localStorage.getItem('current_user_email');
-          await fetch(
-            `http://localhost:4000/api/user/updateLocation/${encodeURIComponent(email)}/${encodeURIComponent(simplified)}`,
-            {
-              method: 'PATCH',
-            }
-          );
+          localStorage.setItem('userLocation', simplified);
           setUserCoords([parseFloat(lat), parseFloat(lon)]);
           setUserLocation(simplified);
           alert(`Location updated to: ${simplified}`);
@@ -141,29 +134,9 @@ function SearchBar({ setUserCoords, setUserLocation }) {
 
 export default function InteractiveMap() {
   const [userCoords, setUserCoords] = useState(null);
- 
-  const [userLocation, setUserLocation] = useState('');
-
-  //Get the location of current user with useEffect hook (has to be like this because can't do async in React components)
-  useEffect(() => {
-    const userEmail = localStorage.getItem('current_user_email');
-    const fetchUserLocation = async () => {
-      try{
-        const response = await fetch(
-          `http://localhost:4000/api/user/getLocation/${userEmail}`
-        );
-        if (!response.ok){
-          throw new Error('Failed to fetch location');
-        }
-        const data = await response.json();
-        const location = data.location;
-        setUserLocation(location || '');
-      }catch (err){
-        console.error(err);
-      }
-    };
-    fetchUserLocation();
-  }, []);
+  const [userLocation, setUserLocation] = useState(
+    localStorage.getItem('userLocation') || ''
+  );
 
   useEffect(() => {
     if (!userLocation) return;

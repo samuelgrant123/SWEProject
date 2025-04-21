@@ -1,37 +1,61 @@
-import React, { useState } from 'react';
-import ChecklistPage from './components/ChecklistPage';
-import ChatBoard from './components/ChatBoard';
+import React, { useEffect, useState } from 'react';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
-import ResourcesPage from './components/ResourcesPage';
-//import UserProfile from './components/UserProfile';
-//import { onAuthStateChanged } from 'firebase/auth';
-
 
 function App() {
-  const [screen, setScreen] = useState('landing');
+  const [screen, setScreen] = useState(() => localStorage.getItem('currentScreen') || 'landing');
+  const [user, setUser] = useState(null);
+  const [userType, setUserType] = useState('guest');
 
-  const renderScreen = () => {
-    switch (screen) {
-      case 'landing':
-        return <LandingPage onNavigate={setScreen} />;
-      case 'dashboard':
-        return <Dashboard onNavigate={setScreen} />;
-      case 'checklist':
-        return <ChecklistPage onNavigate={setScreen} />;
-      case 'chat':
-        return <ChatBoard onNavigate={setScreen} />;
-      case 'resources':
-        return <ResourcesPage onNavigate={setScreen} />;
-      //case 'profile':
-        //return <UserProfile onNavigate={setScreen} />;
-      default:
-        return <LandingPage onNavigate={setScreen} />;
+  // Initial load
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('userEmail');
+    const storedType = localStorage.getItem('userType');
+    const storedName = localStorage.getItem('userDisplayName');
+
+    if (storedType === 'authenticated' && storedEmail) {
+      setUser({ email: storedEmail, displayName: storedName || 'User' });
+      setUserType('authenticated');
+    } else {
+      setUser(null);
+      setUserType('guest');
     }
+  }, []);
+
+  // Re-check on custom event
+  useEffect(() => {
+    const handleUserLogin = () => {
+      const storedEmail = localStorage.getItem('userEmail');
+      const storedType = localStorage.getItem('userType');
+      const storedName = localStorage.getItem('userDisplayName');
+
+      if (storedType === 'authenticated' && storedEmail) {
+        setUser({ email: storedEmail, displayName: storedName || 'User' });
+        setUserType('authenticated');
+      } else {
+        setUser(null);
+        setUserType('guest');
+      }
+    };
+
+    window.addEventListener('user-login', handleUserLogin);
+    return () => window.removeEventListener('user-login', handleUserLogin);
+  }, []);
+
+  const handleNavigate = (nextScreen) => {
+    localStorage.setItem('currentScreen', nextScreen);
+    setScreen(nextScreen);
   };
 
-  return <div className="App">{renderScreen()}</div>;
+  return screen === 'dashboard' ? (
+    <Dashboard
+      onNavigate={handleNavigate}
+      user={user}
+      userType={userType}
+    />
+  ) : (
+    <LandingPage onNavigate={handleNavigate} />
+  );
 }
 
 export default App;
-

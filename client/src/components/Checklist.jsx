@@ -1,68 +1,80 @@
-import React, { useState, useEffect } from 'react';
-
-const defaultTasks = [
-  { id: 1, text: 'Create an emergency contact list', completed: false },
-  { id: 2, text: 'Assemble a disaster supply kit', completed: false },
-  { id: 3, text: 'Identify nearby shelters or safe zones', completed: false },
-  { id: 4, text: 'Plan evacuation routes', completed: false },
-  { id: 5, text: 'Prepare important documents', completed: false },
-];
+// client/src/components/Checklist.jsx
+import React, { useEffect, useState } from 'react';
+import './Checklist.css';
 
 export default function Checklist() {
-  // Load from localStorage if available
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('checklistTasks');
-    return saved ? JSON.parse(saved) : defaultTasks;
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem('checklist_items');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, text: 'Emergency water supply', checked: false },
+      { id: 2, text: 'Flashlight with batteries', checked: false },
+      { id: 3, text: 'First aid kit', checked: false },
+    ];
   });
 
-  // Save to localStorage when tasks change
-  useEffect(() => {
-    localStorage.setItem('checklistTasks', JSON.stringify(tasks));
-  }, [tasks]);
+  const [newItem, setNewItem] = useState('');
 
-  const toggleTask = (id) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+  useEffect(() => {
+    localStorage.setItem('checklist_items', JSON.stringify(items));
+  }, [items]);
+
+  const toggleItem = (id) => {
+    setItems(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
     );
-    setTasks(updatedTasks);
   };
 
-  const completedCount = tasks.filter(task => task.completed).length;
-  const totalTasks = tasks.length;
-  const progressPercent = Math.round((completedCount / totalTasks) * 100);
+  const addItem = () => {
+    if (!newItem.trim()) return;
+    setItems(prev => [
+      ...prev,
+      { id: Date.now(), text: newItem.trim(), checked: false },
+    ]);
+    setNewItem('');
+  };
+
+  const deleteItem = (id) => {
+    setItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const checkedCount = items.filter(item => item.checked).length;
+  const progress = items.length === 0 ? 0 : (checkedCount / items.length) * 100;
 
   return (
-    <div style={{ marginTop: '30px' }}>
+    <div className="checklist-container">
       <h2>Preparedness Checklist</h2>
 
-      <div style={{ background: '#eee', height: '20px', borderRadius: '10px', overflow: 'hidden', marginBottom: '15px' }}>
-        <div
-          style={{
-            background: '#4caf50',
-            width: `${progressPercent}%`,
-            height: '100%',
-            transition: 'width 0.3s ease'
-          }}
-        />
+      <div className="checklist-progress">
+        <div className="progress-bar" style={{ width: `${progress}%` }} />
+        <span>{Math.round(progress)}% Complete</span>
       </div>
 
-      <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-        {tasks.map(task => (
-          <li key={task.id} style={{ marginBottom: '10px' }}>
+      <ul className="checklist-items">
+        {items.map(item => (
+          <li key={item.id} className={item.checked ? 'checked' : ''}>
             <label>
               <input
                 type="checkbox"
-                checked={task.completed}
-                onChange={() => toggleTask(task.id)}
-                style={{ marginRight: '10px' }}
+                checked={item.checked}
+                onChange={() => toggleItem(item.id)}
               />
-              <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-                {task.text}
-              </span>
+              {item.text}
             </label>
+            <button onClick={() => deleteItem(item.id)}>✕</button>
           </li>
         ))}
       </ul>
+
+      <div className="checklist-add">
+        <input
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          placeholder="Add a new item..."
+        />
+        <button onClick={addItem}>Add</button>
+      </div>
     </div>
   );
 }

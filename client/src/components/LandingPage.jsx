@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import './LandingPage.css';
+import logo from '../assets/logo.png';
 
 export default function LandingPage({ onNavigate }) {
   const [showForm, setShowForm] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,41 +17,98 @@ export default function LandingPage({ onNavigate }) {
     setError('');
     setLoading(true);
 
-    const endpoint = isLogin ? 'login' : 'signup';
+    try {
+      if (!email || !password) throw new Error("Email and password are required");
 
-    try{
-      const response = await fetch(`http://localhost:4000/api/auth/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify({email, password})
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-
-      if (endpoint === 'signup'){
-        const signupResponse = await fetch(`http://localhost:4000/api/user/post`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json'},
-          body: JSON.stringify({firstName, lastName, email, password})
+      if (isLogin) {
+        // Login through backend
+        const response = await fetch("http://localhost:4000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
 
-        const userPostData = await signupResponse.json();
-        if (!signupResponse.ok) throw new Error(userPostData.message);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+
+        localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('userType', 'authenticated');
+        localStorage.setItem('userDisplayName', data.displayName || 'User');
+
+      } else {
+        if (password !== confirm) throw new Error("Passwords do not match");
+
+        // Signup
+        const signupRes = await fetch("http://localhost:4000/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, displayName: username }),
+        });
+
+        const data = await signupRes.json();
+        if (!signupRes.ok) throw new Error(data.message);
+
+        // Also save to Firestore database
+        await fetch("http://localhost:4000/api/user/post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            firstName: username,
+            lastName: "Default",
+          }),
+        });
+
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userType', 'authenticated');
+        localStorage.setItem('userDisplayName', username);
       }
-      localStorage.setItem('current_user_type', 'user');
-      localStorage.setItem('current_user_email', email);
-      setLoading(false);
+
+      localStorage.setItem('userLocation', 'Gainesville, Florida');
+      localStorage.setItem('currentScreen', 'dashboard');
+
+      window.dispatchEvent(new Event('user-login'));
       onNavigate('dashboard');
-    }catch (err){
+
+    } catch (err) {
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
+  const handleGuestAccess = async () => {
+    try {
+      // Sign out from backend Firebase session
+      await fetch("http://localhost:4000/api/auth/signout", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (err) {
+      console.warn("Backend signout failed (probably already signed out)");
+    }
+  
+    
+    localStorage.clear();
+  
+    
+    localStorage.setItem('userType', 'guest');
+    localStorage.setItem('userLocation', 'Gainesville, Florida');
+    localStorage.setItem('currentScreen', 'dashboard');
+  
+    
+    window.dispatchEvent(new Event('user-login'));
+  
+    // Navigate
+    onNavigate('dashboard');
+  };
+  
+
   return (
     <div className="landing-container">
       <div className="navbar">
-        <img src="/logo.png" alt="DisasterDash Logo" className="logo" />
+        <img src={logo} alt="DisasterDash Logo" className="logo" />
       </div>
 
       <div className="hero animated">
@@ -63,13 +120,8 @@ export default function LandingPage({ onNavigate }) {
             <button className="primary" onClick={() => setShowForm(true)}>
               Get Started
             </button>
-            <button
-              className="secondary"
-              onClick={() => {
-                localStorage.setItem('current_user_type', 'guest');
-                onNavigate('dashboard');
-              }}
-            >
+
+            <button className="secondary" onClick={handleGuestAccess}>
               Explore as Guest
             </button>
           </div>
@@ -91,21 +143,10 @@ export default function LandingPage({ onNavigate }) {
               {!isLogin && (
                 <input
                   type="text"
-                  placeholder = "First Name"
+                  placeholder="Username"
                   className="w-full mb-4 px-4 py-2 border rounded"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              )}
-
-              {!isLogin && (
-                <input
-                  type="text"
-                  placeholder = "Last Name"
-                  className="w-full mb-4 px-4 py-2 border rounded"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               )}

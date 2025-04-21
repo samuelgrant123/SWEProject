@@ -3,72 +3,45 @@ import InteractiveMap from './InteractiveMap';
 import Checklist from './Checklist';
 import ChatRoom from './ChatBoard';
 import Resources from './ResourcesPage';
+import ProfileModal from './ProfileModal';
 import GuestPromptModal from './GuestPromptModal';
+import logo from '../assets/logo.png';
+import AlertsTab from './AlertsTab';
 import './Dashboard.css';
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard({ onNavigate, user, userType }) {
   const [tab, setTab] = useState('map');
   const [locationName, setLocationName] = useState('');
   const [weather, setWeather] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   const [showGuestPrompt, setShowGuestPrompt] = useState(false);
 
-  const userType = localStorage.getItem('current_user_type'); // Get current user type from localStorage
-
-  //Initial load for location
   useEffect(() => {
-    const fetchLocation = async () => {
-      try{
-        const userEmail = localStorage.getItem('current_user_email');
-        const response = await fetch(`http://localhost:4000/api/user/getLocation/${userEmail}`);
-        if (!response.ok){
-          throw new Error('Error in API fetching the location of user');
-        }
-        const data = await response.json();
-        const loc = data.location;
-        if (loc){
-          setLocationName(loc);
-          fetchWeather(loc);
-        }
-      }catch (error) {
-        console.error('Error fetching location in Dashboard.jsx:', error);
-      }
-    };
-    fetchLocation();
+    const loc = localStorage.getItem('userLocation');
+    if (loc) {
+      setLocationName(loc);
+      fetchWeather(loc);
+    }
   }, []);
-  
 
-  //Sync with localStorage updates for location
   useEffect(() => {
-    const updateLocation = async () => {
-      try {
-        const userEmail = localStorage.getItem('current_user_email');
-        const response = await fetch(`http://localhost:4000/api/user/getLocation/${userEmail}`);
-        if (!response.ok) {
-          throw new Error('Error in API fetching the location of user');
-        }
-        const data = await response.json();
-        const newLoc = data.location;
-        if (newLoc && newLoc !== locationName){
-          setLocationName(newLoc);
-          fetchWeather(newLoc);
-        }
-      } catch (error) {
-        console.error('Location update failure in Dashboard.jsx', error);
+    const updateLocation = () => {
+      const newLoc = localStorage.getItem('userLocation');
+      if (newLoc && newLoc !== locationName) {
+        setLocationName(newLoc);
+        fetchWeather(newLoc);
       }
     };
-  
+
     window.addEventListener('storage', updateLocation);
     const interval = setInterval(updateLocation, 1000);
-  
+
     return () => {
       window.removeEventListener('storage', updateLocation);
       clearInterval(interval);
     };
   }, [locationName]);
-  
 
-  //Calling the weather API
   const fetchWeather = async (location) => {
     try {
       const res = await fetch(
@@ -100,6 +73,20 @@ export default function Dashboard({ onNavigate }) {
     return map[code] || 'Unknown';
   };
 
+  const handleSignOut = async () => {
+    try {
+      await fetch("http://localhost:4000/api/auth/signout", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Error signing out", error);
+    }
+
+    localStorage.clear();
+    onNavigate('landing');
+  };
+
   const renderTab = () => {
     switch (tab) {
       case 'map':
@@ -111,16 +98,12 @@ export default function Dashboard({ onNavigate }) {
         );
       case 'chat':
         return <ChatRoom />;
-      case 'alerts':
-        return (
-          <div className="tab-content alert-tab">
-            Tornado Warning in your area
-          </div>
-        );
       case 'checklist':
         return <Checklist />;
       case 'resources':
         return <Resources />;
+      case 'alerts':
+        return <AlertsTab />;
       default:
         return null;
     }
@@ -128,54 +111,44 @@ export default function Dashboard({ onNavigate }) {
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <div className="dashboard-header">
         <div className="logo-title">
-          <img src="/logo.png" alt="Logo" className="dashboard-logo" />
+          <img src={logo} alt="DisasterDash Logo" className="logo" />
           <div>
             <h1>DisasterDash by ApocaTech</h1>
             <p className="weather-text">{weather}</p>
           </div>
         </div>
-        <div
-          className="user-badge"
-          onClick={() => {
-            if (userType === 'guest') {
-              setShowGuestPrompt(true);
-            } else {
-              setShowProfile(true);
-            }
-          }}
-        >
-          {'Profile'}
-        </div>
-        <div>
-        {userType !== 'guest' && (
-            <button
-              className="sign-out-button"
-              onClick={async () => {
-                try{
-                  await fetch("http://localhost:4000/api/auth/signout", {
-                    method: "DELETE",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                  });
-                  localStorage.removeItem('current_user_location');
-                  localStorage.removeItem('current_user_email');
-                  onNavigate('landing'); // Navigate to the landing page
-                }catch(error){
-                  console.error("Error on the frontend side of signing out");
-                }
-              }}
-            >
+
+        <div className="user-controls">
+          <div
+            className="user-badge"
+            onClick={() => {
+              if (userType === 'guest') {
+                setShowGuestPrompt(true);
+              } else {
+                setShowProfile(true);
+              }
+            }}
+          >
+            {userType === 'guest' ? 'Guest' : user?.displayName || 'User'}
+          </div>
+
+          {userType === 'authenticated' ? (
+            <button className="sign-out-button" onClick={handleSignOut}>
               Sign Out
             </button>
-        )}
+          ) : (
+            <button
+              className="sign-out-button"
+              onClick={() => onNavigate('landing')}
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="dashboard-tabs">
         {['map', 'chat', 'alerts', 'checklist', 'resources'].map((t) => (
           <button
@@ -188,20 +161,21 @@ export default function Dashboard({ onNavigate }) {
         ))}
       </div>
 
-      {/* Tab Content */}
-      <div className="dashboard-body">
-        {renderTab()}
-      </div>
+      <div className="dashboard-body">{renderTab()}</div>
 
+      {showProfile && (
+        <ProfileModal
+          user={user}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
 
-      {/* Guest Prompt Modal */}
       {showGuestPrompt && (
         <GuestPromptModal
           onClose={() => setShowGuestPrompt(false)}
           onLoginClick={() => {
-            localStorage.removeItem('current_user_type');
-            localStorage.removeItem('current_user_email');
-            onNavigate('landing'); // Go back to landing page
+            localStorage.clear();
+            onNavigate('landing');
           }}
         />
       )}
