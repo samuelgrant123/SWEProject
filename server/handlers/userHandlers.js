@@ -4,14 +4,13 @@ import { doc, getDoc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
 //Method to create a new user
 export const postUserData = async (req, res) => {
     try{
-        const { firstName, lastName, email, password } = req.body;
-        if (!firstName || !lastName || !email || !password) {
+        const { username, email, password } = req.body;
+        if (!username || !email || !password) {
             return res.status(400).json({error: "Data not in all fields"});
         }
         const location = "Gainesville, Florida";
         const userData = {
-            firstName,
-            lastName,
+            username,
             email,
             password,
             location
@@ -78,8 +77,7 @@ export const getAllUserData = async (req, res) => {
 
         if (documentSnapshot.exists()){
             res.json({
-                 firstName: documentSnapshot.data().firstName,
-                 lastName: documentSnapshot.data().lastName,
+                 username: documentSnapshot.data().username,
                  location: documentSnapshot.data().location
             }); 
         }else{
@@ -98,9 +96,8 @@ export const getAllUserData = async (req, res) => {
 //Method for deleting user data (don't necessarily need this)
 export const deleteUserData = async (req, res) => {
     try{
-        const {firstname, lastname} = req.query;
-        const user = firstname + " " + lastname;
-        const userRef = doc(db, "users", user);
+        const {email} = req.params;
+        const userRef = doc(db, "users", email);
 
         await deleteDoc(userRef);
         return res.status(200).json({message: "User deleted successfully"});

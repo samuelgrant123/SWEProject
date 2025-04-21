@@ -7,8 +7,7 @@ import { describe, it, expect } from 'vitest';
 //Creating a new user
 describe('Create User', () => {
     const userData = {
-        firstName: 'Example First Name',
-        lastName: 'Example Last Name',
+        username: 'Example Username',
         email: 'email@example.com',
         password: '123456',
         location: 'Gainesville, Florida',
@@ -30,8 +29,7 @@ describe('Get Data about User', () => {
         expect(response.statusCode).toBe(200);
 
         const userData = response.body;
-        expect(userData.firstName).toBe('Example First Name');
-        expect(userData.lastName).toBe('Example Last Name');
+        expect(userData.username).toBe('Example Useranme');
         expect(userData.location).toBe('Gainesville, Florida');
     });
 });

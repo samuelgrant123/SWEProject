@@ -55,8 +55,7 @@ export default function LandingPage({ onNavigate }) {
           body: JSON.stringify({
             email,
             password,
-            firstName: username,
-            lastName: "Default",
+            username: username,
           }),
         });
 
