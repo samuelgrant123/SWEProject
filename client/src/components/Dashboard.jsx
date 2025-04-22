@@ -16,6 +16,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
   const [showProfile, setShowProfile] = useState(false);
   const [showGuestPrompt, setShowGuestPrompt] = useState(false);
 
+  //Load weather - location in local storage
   useEffect(() => {
     const loc = localStorage.getItem('userLocation');
     if (loc) {
@@ -24,6 +25,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     }
   }, []);
 
+  //Continuously check for location updates
   useEffect(() => {
     const updateLocation = () => {
       const newLoc = localStorage.getItem('userLocation');
@@ -42,6 +44,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     };
   }, [locationName]);
 
+  //Fetch weather based on geocoded coordinates
   const fetchWeather = async (location) => {
     try {
       const res = await fetch(
@@ -65,6 +68,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     }
   };
 
+  //Translate weather code to description
   const getWeatherDescription = (code) => {
     const map = {
       0: 'Clear', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
@@ -73,6 +77,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     return map[code] || 'Unknown';
   };
 
+  //Sign-out handler
   const handleSignOut = async () => {
     try {
       await fetch("http://localhost:4000/api/auth/signout", {
@@ -87,6 +92,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     onNavigate('landing');
   };
 
+  //Render content for each tab
   const renderTab = () => {
     switch (tab) {
       case 'map':
@@ -109,6 +115,7 @@ export default function Dashboard({ onNavigate, user, userType }) {
     }
   };
 
+  //Front end jsx code
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">

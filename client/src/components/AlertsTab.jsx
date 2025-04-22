@@ -6,6 +6,7 @@ export default function AlertsTab() {
   const [loading, setLoading] = useState(true);
   const [locationName, setLocationName] = useState(localStorage.getItem('userLocation') || '');
 
+  //Initial load
   useEffect(() => {
     if (locationName) {
       fetchCoordinatesAndAlerts(locationName);
@@ -14,7 +15,7 @@ export default function AlertsTab() {
 
   const fetchCoordinatesAndAlerts = async (location) => {
     try {
-      // Geocode location to lat/lon
+      //Geocode location to lat/lon
       const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`);
       const geoData = await geoRes.json();
       if (geoData.length === 0) {
@@ -25,7 +26,7 @@ export default function AlertsTab() {
 
       const { lat, lon } = geoData[0];
 
-      // Fetch alerts from NOAA
+      //Fetch alerts from NOAA
       const alertRes = await fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`);
       const alertData = await alertRes.json();
 
@@ -37,6 +38,7 @@ export default function AlertsTab() {
     }
   };
 
+  //Front end jsx code to display the alerts
   return (
     <div className="tab-content alerts-tab">
       <h2>Disaster Alerts</h2>

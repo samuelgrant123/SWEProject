@@ -1,8 +1,9 @@
-// client/src/components/Checklist.jsx
+//client/src/components/Checklist.jsx
 import React, { useEffect, useState } from 'react';
 import './Checklist.css';
 
 export default function Checklist() {
+  //Initialize checklist items from localStorage or default list
   const [items, setItems] = useState(() => {
     const saved = localStorage.getItem('checklist_items');
     return saved ? JSON.parse(saved) : [
@@ -14,10 +15,12 @@ export default function Checklist() {
 
   const [newItem, setNewItem] = useState('');
 
+  //Sync items to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('checklist_items', JSON.stringify(items));
   }, [items]);
 
+  //Toggle checked state of an item
   const toggleItem = (id) => {
     setItems(prev =>
       prev.map(item =>
@@ -26,6 +29,7 @@ export default function Checklist() {
     );
   };
 
+  //Add new checklist item
   const addItem = () => {
     if (!newItem.trim()) return;
     setItems(prev => [
@@ -35,6 +39,7 @@ export default function Checklist() {
     setNewItem('');
   };
 
+  //Delete an item by ID
   const deleteItem = (id) => {
     setItems(prev => prev.filter(item => item.id !== id));
   };
@@ -42,6 +47,7 @@ export default function Checklist() {
   const checkedCount = items.filter(item => item.checked).length;
   const progress = items.length === 0 ? 0 : (checkedCount / items.length) * 100;
 
+  //Front end jsx code
   return (
     <div className="checklist-container">
       <h2>Preparedness Checklist</h2>

@@ -12,6 +12,7 @@ export default function LandingPage({ onNavigate }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  //Handle login or signup
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -21,7 +22,7 @@ export default function LandingPage({ onNavigate }) {
       if (!email || !password) throw new Error("Email and password are required");
 
       if (isLogin) {
-        // Login through backend
+        //Login through backend
         const response = await fetch("http://localhost:4000/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -38,7 +39,7 @@ export default function LandingPage({ onNavigate }) {
       } else {
         if (password !== confirm) throw new Error("Passwords do not match");
 
-        // Signup
+        //Signup
         const signupRes = await fetch("http://localhost:4000/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -48,7 +49,7 @@ export default function LandingPage({ onNavigate }) {
         const data = await signupRes.json();
         if (!signupRes.ok) throw new Error(data.message);
 
-        // Also save to Firestore database
+        //Also save to Firestore database
         await fetch("http://localhost:4000/api/user/post", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -59,11 +60,13 @@ export default function LandingPage({ onNavigate }) {
           }),
         });
 
+        //Set localstorage values
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userType', 'authenticated');
         localStorage.setItem('userDisplayName', username);
       }
 
+      //Set localstorage values
       localStorage.setItem('userLocation', 'Gainesville, Florida');
       localStorage.setItem('currentScreen', 'dashboard');
 
@@ -77,9 +80,10 @@ export default function LandingPage({ onNavigate }) {
     }
   };
 
+  //Guest mode setup
   const handleGuestAccess = async () => {
     try {
-      // Sign out from backend Firebase session
+      //Sign out from backend Firebase session
       await fetch("http://localhost:4000/api/auth/signout", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -87,11 +91,8 @@ export default function LandingPage({ onNavigate }) {
     } catch (err) {
       console.warn("Backend signout failed (probably already signed out)");
     }
-  
-    
     localStorage.clear();
   
-    
     localStorage.setItem('userType', 'guest');
     localStorage.setItem('userLocation', 'Gainesville, Florida');
     localStorage.setItem('currentScreen', 'dashboard');
@@ -99,11 +100,11 @@ export default function LandingPage({ onNavigate }) {
     
     window.dispatchEvent(new Event('user-login'));
   
-    // Navigate
+    //Navigate
     onNavigate('dashboard');
   };
   
-
+  //Front end jsx code
   return (
     <div className="landing-container">
       <div className="navbar">

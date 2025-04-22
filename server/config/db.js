@@ -1,35 +1,27 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import 'dotenv/config';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
-// const apiKey = process.env.API_KEY;
-// const authDomain = process.env.AUTH_DOMAIN;
-// const projectId = process.env.PROJECT_ID;
-// const storageBucket = process.env.STORAGE_BUCKET;
-// const messagingSenderId = process.env.SENDER_ID;
-// const appId = process.env.APP_ID;
-// const measurementId = process.env.MEASUREMENT_ID;
+//Configure the dot env variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
-const apiKey = "AIzaSyDCxdecZb3qufue6W179YBcvJDsxtDTi9k";
-const authDomain = "disasterdash-a77b2.firebaseapp.com";
-const projectId = "disasterdash-a77b2";
-const storageBucket = "disasterdash-a77b2.firebasestorage.app";
-const messagingSenderId = "329859835226";
-const appId = "1:329859835226:web:b297bc78714128a6a97f63";
-const measurementId = "G-NNP2R9MN4D";
-
-
+//Get all of firebase information from .env file
 const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: authDomain,
-    projectId: projectId,
-    storageBucket: storageBucket,
-    messagingSenderId: messagingSenderId,
-    appId: appId,
-    measurementId: measurementId
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAIN,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STORAGE_BUCKET,
+    messagingSenderId: process.env.SENDER_ID,
+    appId: process.env.APP_ID,
+    measurementId: process.env.MEASUREMENT_ID
 };
 
+//Initialize the Firebase app
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);

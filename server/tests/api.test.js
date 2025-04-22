@@ -1,8 +1,7 @@
+import 'dotenv/config';
 import app from '../app.js';
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
-
-//MAKE SURE THERE IS DATA IN THE DATABASE BEFORE TESTING THESE
 
 //Creating a new user
 describe('Create User', () => {
@@ -29,7 +28,7 @@ describe('Get Data about User', () => {
         expect(response.statusCode).toBe(200);
 
         const userData = response.body;
-        expect(userData.username).toBe('Example Useranme');
+        expect(userData.username).toBe('Example Username');
         expect(userData.location).toBe('Gainesville, Florida');
     });
 });

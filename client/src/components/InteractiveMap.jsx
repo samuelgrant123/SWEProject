@@ -20,7 +20,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// 👇 Helper to extract just city and state
+//Extract simplified city and state string from address
 const simplifyAddress = (address) => {
   const city =
     address.city ||
@@ -32,7 +32,7 @@ const simplifyAddress = (address) => {
   return [city, state].filter(Boolean).join(', ');
 };
 
-// 👇 Auto-center the map when coords update
+//Recenter map on coordinate change
 function MapCenter({ coords }) {
   const map = useMap();
   useEffect(() => {
@@ -43,7 +43,7 @@ function MapCenter({ coords }) {
   return null;
 }
 
-// 👇 Double-click to update location
+//User can update location by double-clicking on the map
 function LocationSelector({ setUserCoords, setUserLocation }) {
   useMapEvents({
     dblclick: async (e) => {
@@ -70,7 +70,7 @@ function LocationSelector({ setUserCoords, setUserLocation }) {
   return null;
 }
 
-// 👇 Search bar in top-right corner
+//Location search form in the corner of the map
 function SearchBar({ setUserCoords, setUserLocation }) {
   const [query, setQuery] = useState('');
 
@@ -104,6 +104,7 @@ function SearchBar({ setUserCoords, setUserLocation }) {
     }
   };
 
+  //Front end jsx code
   return (
     <form
       onSubmit={handleSearch}

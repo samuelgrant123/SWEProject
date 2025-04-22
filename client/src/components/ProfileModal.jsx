@@ -9,6 +9,7 @@ export default function ProfileModal({ user, onClose }) {
 
   const handleSave = async () => {
     try {
+      //Update display name if it changed
       if (user?.email && displayName !== user.displayName) {
         await fetch(`http://localhost:4000/api/user/updateName/${user.email}/${displayName}`, {
           method: 'PATCH',
@@ -18,8 +19,8 @@ export default function ProfileModal({ user, onClose }) {
         setStatus('Username updated.');
       }
 
-      if (location) {
-        // ✅ Backend: Update location
+      //Update location in backend and local storage
+      if (location){
         await fetch(`http://localhost:4000/api/user/updateLocation/${user.email}/${location}`, {
           method: 'PATCH',
         });
@@ -28,7 +29,7 @@ export default function ProfileModal({ user, onClose }) {
         setStatus((prev) => `${prev} Location saved.`);
       }
 
-      // ✅ Refresh UI (App.jsx or Dashboard will pick up the event)
+      //Trigger UI refresh
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -36,6 +37,7 @@ export default function ProfileModal({ user, onClose }) {
     }
   };
 
+  //Front end jsx code
   return (
     <div className="profile-modal-overlay">
       <div className="profile-modal">

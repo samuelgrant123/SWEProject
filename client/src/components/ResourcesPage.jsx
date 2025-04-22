@@ -27,6 +27,7 @@ export default function ResourcesPage({ onNavigate }) {
     setLocation(loc);
     fetchNews(loc, 1, true);
   
+    //Sync location periodically
     const syncLocation = () => {
       const newLoc = localStorage.getItem('userLocation');
       if (newLoc && newLoc !== loc) {
@@ -40,6 +41,7 @@ export default function ResourcesPage({ onNavigate }) {
   }, []);
   
 
+  //Fetch news articles based on location and page
   const fetchNews = async (loc, pageNumber, replace = false) => {
     setLoading(true);
     setError('');
@@ -73,16 +75,18 @@ export default function ResourcesPage({ onNavigate }) {
     setLoading(false);
   };
   
+  //Reset to page 1 and replace all articles
   const handleRefresh = () => {
     const loc = localStorage.getItem('userLocation') || 'USA';
-    fetchNews(loc, 1, true); // Reset to page 1 and replace all articles
+    fetchNews(loc, 1, true);
   };
   
-
+  //Load next page
   const handleLoadMore = () => {
-    fetchNews(location, page + 1); // Load next page
+    fetchNews(location, page + 1);
   };
 
+  //Front end jsx code
   return (
     <div style={{ padding: '20px' }}>
       <h2>News & Resources for {location}</h2>

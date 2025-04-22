@@ -1,10 +1,11 @@
-// client/src/components/ChatBoard.jsx
+//client/src/components/ChatBoard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { getDatabase, ref, onChildAdded, push } from 'firebase/database';
 import './ChatBoard.css';
 import { getAuth } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 
+//Firebase configuration for Realtime Database
 const firebaseConfig = {
   apiKey: "AIzaSyDCxdecZb3qufue6W179YBcvJDsxtDTi9k",
   authDomain: "disasterdash-a77b2.firebaseapp.com",
@@ -32,14 +33,22 @@ export default function ChatBoard() {
     const chatRef = ref(db, `chats/${locationKey}`);
     messagesRef.current = [];
 
+    //Listen for new chat messages in this location
     const unsubscribe = onChildAdded(chatRef, (snapshot) => {
       const msg = snapshot.val();
-      if (!messagesRef.current.some(m => m.timestamp === msg.timestamp && m.text === msg.text)) {
-        messagesRef.current.unshift(msg); // Newest at top
+
+      //Prevent duplicates from being added
+      const exists = messagesRef.current.some(
+        (m) => m.timestamp === msg.timestamp && m.text === msg.text
+      );
+
+      if (!exists) {
+        messagesRef.current.unshift(msg); //add to top
         setMessages([...messagesRef.current]);
       }
     });
 
+    //Cleanup on unmount
     return () => {
       messagesRef.current = [];
     };
@@ -50,6 +59,7 @@ export default function ChatBoard() {
     if (!input.trim()) return;
 
     const chatRef = ref(db, `chats/${locationKey}`);
+    //Push new message to Realtime Database
     await push(chatRef, {
       text: input.trim(),
       sender: username,
@@ -59,6 +69,7 @@ export default function ChatBoard() {
     setInput('');
   };
 
+  //Front end jsx code
   return (
     <div className="chat-container">
       <h2>Chat Room – {userLocation}</h2>

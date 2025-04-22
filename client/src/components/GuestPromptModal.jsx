@@ -1,6 +1,7 @@
 import React from 'react';
 import './Dashboard.css';
 
+//Prompt for guest users to sign in 
 export default function GuestPromptModal({ onClose, onLoginClick }) {
   return (
     <div className="modal-overlay">

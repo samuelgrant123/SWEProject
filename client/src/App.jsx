@@ -7,7 +7,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [userType, setUserType] = useState('guest');
 
-  // Initial load
+  //Initial load
   useEffect(() => {
     const storedEmail = localStorage.getItem('userEmail');
     const storedType = localStorage.getItem('userType');
@@ -22,7 +22,7 @@ function App() {
     }
   }, []);
 
-  // Re-check on custom event
+  //Re-check on custom event
   useEffect(() => {
     const handleUserLogin = () => {
       const storedEmail = localStorage.getItem('userEmail');

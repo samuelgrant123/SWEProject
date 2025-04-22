@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
 export const postUserData = async (req, res) => {
     try{
         const { username, email, password } = req.body;
-        if (!username || !email || !password) {
+        if (!username || !email || !password){
             return res.status(400).json({error: "Data not in all fields"});
         }
         const location = "Gainesville, Florida";
